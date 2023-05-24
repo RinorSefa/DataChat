@@ -1,6 +1,7 @@
 import openai
 import os
 import sys
+from openai_utils import completions_with_backoff
 
 # Get the value of an environment variable
 openai.api_key = os.environ.get('OPENAI_API_KEY')
@@ -36,12 +37,12 @@ while True:
     if question.upper() == "EXIT":
         break
 
-    chat_completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You will answer question regarding a CSV file content"},
-            {"role": "user", "content": " Here is the CSV data " + contents},
-            {"role": "user", "content": question}
-        ]
-    )
+    model = "gpt-3.5-turbo"
+    message = [
+        {"role": "system", "content": "You will answer question regarding a CSV file content"},
+        {"role": "user", "content": " Here is the CSV data " + contents},
+        {"role": "user", "content": question}
+    ]
+
+    chat_completion = completions_with_backoff(model, message)
     print(chat_completion.choices[0].message.content)
